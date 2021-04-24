@@ -18,7 +18,8 @@ public class App {
 		MonthView mView = new MonthView(frame);
 		
 		content.add(mView.getView());
-		frame.setMinimumSize(new Dimension(625, 570));
+		//frame.setMinimumSize(new Dimension(625, 570));
+		frame.setSize(new Dimension(mView.getView().getWidth(), mView.getView().getHeight()));
 		frame.setVisible(true);
 	}
 }

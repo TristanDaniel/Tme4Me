@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class MonthView {
@@ -16,31 +18,35 @@ public class MonthView {
 	private int year;
 	private JPanel mainPanel, menuBar, calPanel;
 	private JPanel[][] days;
-	private Calendar cal;
+	private Calendar cal, today;
 	private int height, width, daySide, gap, barHeight, buttonWidth, barSpace;
 	private JButton incrButton, decrButton;
 	private JFrame frame;
+	private JLabel monthName;
 	
 	public MonthView(JFrame frame) {
 		this.frame = frame;
 		cal = Calendar.getInstance();
 		cal.setTime(new Date());
+		today = Calendar.getInstance();
+		today.setTime(new Date());
 		month = cal.get(Calendar.MONTH);
 		year = cal.get(Calendar.YEAR);
+		monthName = new JLabel();
 		mainPanel = new JPanel();
 		menuBar = new JPanel();
 		calPanel = new JPanel();
 		daySide = 75;
-		gap = 10;
+		gap = 6;
 		barHeight = 50;
 		buttonWidth = 60;
 		height = (6 * daySide) + (7 * gap) + barHeight;
 		width = (7 * daySide) + (8 * gap);
 		barSpace = width - (2 * buttonWidth);
 		
-		mainPanel.setMinimumSize(new Dimension(width, height));
-		menuBar.setMinimumSize(new Dimension(width, barHeight));
-		calPanel.setMinimumSize(new Dimension(width, height - barHeight));
+		mainPanel.setSize(new Dimension(width, height));
+		menuBar.setSize(new Dimension(width, barHeight));
+		calPanel.setSize(new Dimension(width, height - barHeight));
 		
 		createView();
 	}
@@ -60,7 +66,7 @@ public class MonthView {
 		incrButton.addActionListener(e -> {incMonth();});
 		rightButtonPanel.add(incrButton);
 		
-		centerContentPanel.setMinimumSize(new Dimension(barSpace, barHeight));
+		centerContentPanel.setSize(new Dimension(barSpace, barHeight));
 		
 		menuBar.add(leftButtonPanel, BorderLayout.WEST);
 		menuBar.add(centerContentPanel, BorderLayout.CENTER);
@@ -68,6 +74,9 @@ public class MonthView {
 		
 		//make cal
 		makeCal();
+		
+		//add label
+		centerContentPanel.add(monthName);
 		
 		//make main
 		mainPanel.setLayout(new BorderLayout());
@@ -98,6 +107,14 @@ public class MonthView {
 	
 	private void makeCal() {
 		cal.set(year, month, 1);
+		monthName.setText(cal.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.ENGLISH) 
+				+ " " + cal.get(Calendar.YEAR));
+		
+		boolean checkToday = false;
+		if ((year == today.get(Calendar.YEAR)) && (month == today.get(Calendar.MONTH))) {
+			checkToday = true;
+		}
+		
 		int firstDay = cal.get(Calendar.DAY_OF_WEEK);
 		int curDay = 1;
 		days = new JPanel[6][7];
@@ -108,7 +125,7 @@ public class MonthView {
 		for (int i = 0; i < 6; i++) {
 			for (int j = 0; j < 7; j++) {
 				days[i][j] = new JPanel();
-				days[i][j].setMinimumSize(new Dimension(daySide + (gap / 2), 
+				days[i][j].setSize(new Dimension(daySide + (gap / 2), 
 						daySide + (gap / 2)));
 				
 				if (curDay == 1) {
@@ -116,7 +133,10 @@ public class MonthView {
 						JButton dayBtn = new JButton("1");
 						int dayNum = curDay;
 						dayBtn.addActionListener(e -> {new DayView(dayNum);});
-						dayBtn.setMinimumSize(new Dimension(daySide, daySide));
+						dayBtn.setPreferredSize(new Dimension(daySide, daySide));
+						if (checkToday && (curDay == today.get(Calendar.DATE))) {
+							dayBtn.setBackground(dayBtn.getBackground().darker());
+						}
 						days[i][j].add(dayBtn);
 						curDay++;
 					}
@@ -124,7 +144,10 @@ public class MonthView {
 					JButton dayBtn = new JButton("" + curDay);
 					int dayNum = curDay;
 					dayBtn.addActionListener(e -> {new DayView(dayNum);});
-					dayBtn.setMinimumSize(new Dimension(daySide, daySide));
+					dayBtn.setPreferredSize(new Dimension(daySide, daySide));
+					if (checkToday && (curDay == today.get(Calendar.DATE))) {
+						dayBtn.setBackground(dayBtn.getBackground().darker());
+					}
 					days[i][j].add(dayBtn);
 					curDay++;
 				}
