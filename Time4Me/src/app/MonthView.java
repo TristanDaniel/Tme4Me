@@ -8,9 +8,11 @@ import java.util.Date;
 import java.util.Locale;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 public class MonthView {
 
@@ -82,9 +84,26 @@ public class MonthView {
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(menuBar, BorderLayout.NORTH);
 		mainPanel.add(calPanel, BorderLayout.CENTER);
+		
+		//add keybindings
+		mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(KeyStroke.getKeyStroke("RIGHT"), "incrMonth");
+		mainPanel.getActionMap().put("incrMonth", new KeyBindingAction(1));
+		
+		mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(KeyStroke.getKeyStroke("LEFT"), "decrMonth");
+		mainPanel.getActionMap().put("decrMonth", new KeyBindingAction(2));
+		
+		mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(KeyStroke.getKeyStroke("J"), "jumpMonth");
+		mainPanel.getActionMap().put("jumpMonth", new KeyBindingAction(3));
+		
+		mainPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+		.put(KeyStroke.getKeyStroke("T"), "focusToday");
+		mainPanel.getActionMap().put("focusToday", new KeyBindingAction(4));
 	}
 	
-	private void decMonth() {
+	public void decMonth() {
 		month--;
 		if (month < cal.getActualMinimum(Calendar.MONTH)) {
 			month = cal.getActualMaximum(Calendar.MONTH);
@@ -94,7 +113,7 @@ public class MonthView {
 		makeCal();
 		frame.revalidate();
 	}
-	private void incMonth() {
+	public void incMonth() {
 		month++;
 		if (month > cal.getActualMaximum(Calendar.MONTH)) {
 			month = cal.getActualMinimum(Calendar.MONTH);
@@ -132,7 +151,9 @@ public class MonthView {
 					if ((j+1) == firstDay) {
 						JButton dayBtn = new JButton("1");
 						int dayNum = curDay;
-						dayBtn.addActionListener(e -> {new DayView(dayNum);});
+						int monthNum = month;
+						int yearNum = year;
+						dayBtn.addActionListener(e -> {new DayView(dayNum, monthNum, yearNum);});
 						dayBtn.setPreferredSize(new Dimension(daySide, daySide));
 						if (checkToday && (curDay == today.get(Calendar.DATE))) {
 							dayBtn.setBackground(dayBtn.getBackground().darker());
@@ -143,7 +164,9 @@ public class MonthView {
 				} else if (curDay <= cal.getActualMaximum(Calendar.DATE)) {
 					JButton dayBtn = new JButton("" + curDay);
 					int dayNum = curDay;
-					dayBtn.addActionListener(e -> {new DayView(dayNum);});
+					int monthNum = month;
+					int yearNum = year;
+					dayBtn.addActionListener(e -> {new DayView(dayNum, monthNum, yearNum);});
 					dayBtn.setPreferredSize(new Dimension(daySide, daySide));
 					if (checkToday && (curDay == today.get(Calendar.DATE))) {
 						dayBtn.setBackground(dayBtn.getBackground().darker());
@@ -159,5 +182,17 @@ public class MonthView {
 	
 	public JPanel getView() {
 		return this.mainPanel;
+	}
+	
+	public void jumpToMonth(int tMonth, int tYear) {
+		month = tMonth;
+		year = tYear;
+		
+		makeCal();
+		frame.revalidate();
+	}
+	
+	public void focusToday() {
+		jumpToMonth(today.get(Calendar.MONTH), today.get(Calendar.YEAR));
 	}
 }
